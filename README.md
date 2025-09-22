@@ -44,7 +44,7 @@ This project focuses on optimizing cloud-based inference for RAG (Retrieval-Augm
 ## 4. Solution Concept
 
 ### Global Architectural Structure Of the Project:
-This project mainly includes two parts: serving and benchmarking
+This project mainly includes two parts: serving and benchmarking.
 
 For serving, this project adopts Kubernetes to manage and organize computing and storage resources, where vLLM, as the core of high-performance LLM inference that empowers various upper-level applications, such as text generation and workflows, can be deployed on different nodes along with facilities for agentic workflow, like Cloud-native vector database. Additionally, common mechanisms like load balance, fault tolerance, and dynamic scaling can be supported if resources allow.
 As for the benchmarking, this project includes a benchmark suite that can test different metrics (e.g., Throughput, TTFT, and TPOT) under different scenarios with adjustable payloads.
@@ -54,8 +54,11 @@ As for the benchmarking, this project includes a benchmark suite that can test d
 The architecture follows a phased approach with four distinct phases:
 
 **Phase 1: vLLM** - Basic vLLM setup for LLM inference
+
 **Phase 2: RAG System (+ Vector DB)** - Integration of Retrieval Augmented Generation system with Vector Database
+
 **Phase 3: Caching (+ Redis Cache)** - Incorporation of caching using Redis
+
 **Phase 4: Agentic (+ Orchestration + MCP Server + Heterogeneous Scheduling)** - Addition of agentic capabilities with MCP server and intelligent GPU/CPU task routing
 
 The system includes request processing layer (Load Balancer, API Gateway, Task Classifier, Heterogeneous Scheduler), core inference engine (vLLM Engine, Model Registry), RAG system (Document Processor, Embedding Model, Vector Database, Retrieval Engine), agentic system (MCP Server, Orchestrator, Agentic Workflows), caching layer (Embedding Cache, Query Cache, Response Cache), and infrastructure resources (GPU Nodes, CPU Nodes, Object Storage).
