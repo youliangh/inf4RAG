@@ -28,18 +28,22 @@ This project focuses on optimizing cloud-based inference for RAG (Retrieval-Augm
 ## 3. Scope and Features Of The Project:
 
 **In Scope**:
-- Core inference engine using vLLM with orchestration via llm-d
-- RAG system implementation with document processing, embedding generation, and vector search
-- Caching layer using Redis for embeddings, queries, and responses
-- Standardized benchmarking suite with performance measurement tools (Locust/JMeter, Prometheus)
-- Multi-cloud support for AWS, Azure, and Intel Gaudi accelerator testing
-- Performance metrics including throughput, latency, resource utilization, and cost efficiency analysis
+- **Support various LLM inference tasks** (e.g., text generation and question answering).
+- **Organize modern LLM workloads** (Agentic tasks, RAG workflows) and experiment with different configurations
+  -  Core inference engine built with vLLM
+  - Tweak inference parameters in prebuilt models to improve performance
+  - Execute in cloud native environments
+ - **Craft a benchmarking suite** that can measure the key performance of our system
+    - Report metrics (throughput, latency, cost-efficiency, resource utilization, etc.)
+    - Evaluate different components of the inference stack (orchestration layers, caching strategies, and GPU/accelerator utilization, etc.)
+- **Compare the performance of different inference stack configurations** and highlight best practices for scalability and deployment
 
-**Out of Scope**:
-- Custom model training or fine-tuning
-- Real-time production deployment beyond testing environments
-- Integration with proprietary cloud services not available for testing
-- Long-term production monitoring and maintenance
+
+**Out of scope**:
+- Configure and execute LLM-based inference stacks in non-cloud environments
+- Training and fine-tuning LLMs (existing models will be used instead) 
+- Long-term production deployment and monitoring
+
 
 ## 4. Solution Concept
 
