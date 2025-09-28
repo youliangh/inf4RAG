@@ -6,7 +6,7 @@ import yaml
 
 from models import OpenAIModel, AnthropicModel, HuggingFaceLlama2Model
 from tools import Tools
-from rag import rag_answer, rag_answer_multi  # <-- multi-repo RAG
+from rag import rag_answer, rag_answer_multi 
 
 SYSTEM_MESSAGE_TEMPLATE = "prompt.txt"
 
@@ -23,7 +23,7 @@ KNOWN_REPOS = [
     "https://github.com/EC528-Fall-2025/CNFS-Interposer",
     "https://github.com/EC528-Fall-2025/CloudNeuro-Tekton"
 ]
-ALL_SENTINEL = "__ALL__"  # internal value for "All known repos"
+ALL_SENTINEL = "__ALL__"  
 
 MODELS = {
     "GPT-3.5": OpenAIModel("gpt-3.5-turbo-16k", 16384),
@@ -32,7 +32,6 @@ MODELS = {
     "Llama 2": HuggingFaceLlama2Model("meta-llama/Llama-2-70b-chat-hf", 4096),
 }
 
-# Load configuration from config.yaml
 with open("config.yaml", "r") as config_file:
     config = yaml.safe_load(config_file)
 
