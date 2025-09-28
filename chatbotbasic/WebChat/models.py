@@ -19,25 +19,42 @@ class Model:
         self.context_size = context_size
 
     def generate(self, system_message, new_user_message, history=[], temperature=1):
-        """
-        Return a generator that will stream the completions from the model.
+        if 'OPENAI_API_KEY' not in os.environ:
+            raise Exception(
+                "This model will be run from www.openai.com - Please obtain an API key "
+                "from https://platform.openai.com/account/api-keys and then set the following "
+                "environment variable before running this app:\n"
+                "export OPENAI_API_KEY=<your key>"
+            )
 
-        The history is a list of prior (user_message, assistant_response) 
-        pairs from the chat.
-        """
-        return None
-    
+        messages = [{"role": "system", "content": system_message}]
+
+        for user_message, assistant_response in history:
+            messages.append({"role": "user", "content": user_message})
+            messages.append({"role": "assistant", "content": assistant_response})
+
+        messages.append({"role": "user", "content": new_user_message})
+
+        stream = client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=MAX_TOKENS,
+            stream=True,
+        )
+
+        return stream
+
     def parse_completion(self, completion):
-        """
-        Convert the output from the stream generator into a string.
-        """
+        # ✅ works with ChatCompletionChunk
+        delta = completion.choices[0].delta
+        if delta.content:
+            return delta.content
         return None
-    
-    def count_tokens(self, str):
-        """
-        Count the number of tokens in the string
-        """
-        return None
+
+    def count_tokens(self, s):
+        encoding = tiktoken.encoding_for_model(self.model_name)
+        return len(encoding.encode(s))
 
 class OpenAIModel(Model):
     """
@@ -45,34 +62,33 @@ class OpenAIModel(Model):
     """
     def generate(self, system_message, new_user_message, history=[], temperature=1):
         if 'OPENAI_API_KEY' not in os.environ:
-            raise Exception("This model will be run from www.openai.com - Please obtain an API key from https://platform.openai.com/account/api-keys and then set the following environment variable before running this app:\n```\nexport OPENAI_API_KEY=<your key>\n```")
+            raise Exception("Please set OPENAI_API_KEY before running this app")
 
-        messages = [
-            { "role": "system", "content": system_message},
-        ]
+        messages = [{"role": "system", "content": system_message}]
 
         for user_message, assistant_response in history:
-            messages.append({ "role": "user", "content": user_message })
-            messages.append({ "role": "assistant", "content": assistant_response })
+            if user_message:
+                messages.append({"role": "user", "content": str(user_message)})
+            if assistant_response:
+                messages.append({"role": "assistant", "content": str(assistant_response)})
 
-        messages.append({ "role": "user", "content": new_user_message })
+        messages.append({"role": "user", "content": str(new_user_message)})
 
         stream = client.chat.completions.create(
             model=self.model_name,
             messages=messages,
             temperature=temperature,
             max_tokens=MAX_TOKENS,
-            stream=True
+            stream=True,
         )
 
         return stream
     
     def parse_completion(self, completion):
-        delta = completion["choices"][0]["delta"]
-        if "content" in delta:
-            return delta["content"]
-        else:
-            return None
+        delta = completion.choices[0].delta
+        if delta.content:
+            return delta.content
+        return None
         
     def count_tokens(self, str):
         encoding = tiktoken.encoding_for_model(self.model_name)
