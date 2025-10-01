@@ -96,15 +96,12 @@ To accommodate cloud computing, all components in the serving part can be distri
 **Sprint 1 (09/24 – 10/07)**  
 **Tasks:**  
 - Provision cloud resources (at least 2 providers: AWS/GCP or Azure)  
-- Deploy basic vLLM engine in a Kubernetes cluster  
-- Set up CI/CD pipeline for reproducible deployments  
-- Develop initial benchmarking suite (focus on latency, throughput, TTFT)  
-- Run baseline performance tests on CPU-only and single-GPU setups  
+- Deploy basic vLLM engine in a Kubernetes cluster (or local server if cloud resource is not available yet)
+- Develop a chatbot with retrieval augmented generation 
 
-**Deliverables:**  
-- Running vLLM inference service on the cloud  
-- First version of benchmarking toolkit  
-- Documented baseline metrics report  
+**Deliverables:**
+- Code and dockerfile of deploy a chatbot that integrates RAG
+  
 
 **Sprint 2 (10/08 – 10/28)**  
 **Tasks:**  
