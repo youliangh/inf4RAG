@@ -1,0 +1,22 @@
+# AWS credentials
+*.pem
+*.key
+*_accessKeys*
+*_credentials*
+*deploy_vllm-lightweight-inference*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc

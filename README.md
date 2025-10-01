@@ -14,7 +14,7 @@ This project focuses on optimizing cloud-based inference for RAG (Retrieval-Augm
 
 ## 1. Vision and Goals Of The Project:
 
-Our vision is to design and optimize a scalable cloud-based inference stack that enables efficient deployment of modern large language model (LLM) workloads, including Retrieval-Augmented Generation (RAG) and agentic applications. The project will demonstrate how end-to-end inference workflows can be deployed on heterogeneous cloud infrastructure, leveraging CPUs and accelerators (e.g., GPUs or Intel Gaudi), and orchestrated through Kubernetes. By doing so, we aim to establish best practices that balance performance, cost, and scalability when deploying AI systems in real-world cloud environments. The culmination of this work will be a comprehensive benchmarking report that documents our findings, performance trade-offs, and recommended practices for future deployments.
+**Vision**: To deliver a comprehensive benchmarking framework that enables organizations to make informed decisions about deploying scalable, high-performance AI inference systems in cloud environments, with particular focus on RAG and agentic workloads.
 
 **High-Level Goals**:
 - End-to-End Inference Flow: Build and deploy a complete inference pipeline that supports both simple chatbot interactions and more advanced agentic use cases (e.g., automating domain-specific tasks).
@@ -27,36 +27,31 @@ Our vision is to design and optimize a scalable cloud-based inference stack that
 - Heterogeneous Scheduling: Explore strategies for efficiently distributing workloads across CPUs and accelerators, identifying where GPU offloading provides the most performance benefit.
 
 ## 2. Users/Personas Of The Project:
-This project is designed for technical professionals who deploy, optimize, and maintain AI inference systems, as well as stakeholders who depend on benchmarking insights to guide research or business decisions.
 
 **Primary Users**:
-- ML Engineers: Deploy and optimize LLM inference systems in production environments. They require tools to evaluate latency, throughput, and efficiency across different configurations.
-- Cloud Architects: Design and manage scalable cloud infrastructure. They are focused on heterogeneous scheduling, balancing workloads between CPUs and accelerators, and optimizing cost-performance trade-offs.
-- DevOps Engineers: Maintain the reliability, scalability, and observability of deployed inference systems. They require containerized deployments, CI/CD integration, and monitoring for system health.
+- ML Engineers who need to deploy and optimize LLM inference systems in production environments
+- Cloud Architects responsible for designing scalable cloud infrastructure for AI workloads
+- DevOps Engineers who manage and maintain AI inference systems in cloud environments
 
 **Secondary Users**:
-- Research Teams: Conduct experiments to measure LLM performance, reproducibility, and efficiency across hardware and inference stacks. Their focus is on generating insights rather than maintaining production deployments.
-- Product Managers: Use benchmarking results to make infrastructure investment decisions. They are interested in high-level cost, performance, and scalability trade-offs rather than implementation details.
+- Research Teams conducting experiments on LLM performance and efficiency
+- Product Managers making decisions about AI infrastructure investments
 
 ## 3. Scope and Features Of The Project:
 
 **In Scope**:
-- **Support various LLM inference tasks** (e.g., text generation and question answering).
-- **Organize modern LLM workloads** (Agentic tasks, RAG workflows) and experiment with different configurations
-  -  Core inference engine built with vLLM
-  - Tweak inference parameters in prebuilt models to improve performance
-  - Execute in cloud native environments
- - **Craft a benchmarking suite** that can measure the key performance of our system
-    - Report metrics (throughput, latency, cost-efficiency, resource utilization, etc.)
-    - Evaluate different components of the inference stack (orchestration layers, caching strategies, and GPU/accelerator utilization, etc.)
-- **Compare the performance of different inference stack configurations** and highlight best practices for scalability and deployment
+- Core inference engine using vLLM with orchestration via llm-d
+- RAG system implementation with document processing, embedding generation, and vector search
+- Caching layer using Redis for embeddings, queries, and responses
+- Standardized benchmarking suite with performance measurement tools (Locust/JMeter, Prometheus)
+- Multi-cloud support for AWS, Azure, and Intel Gaudi accelerator testing
+- Performance metrics including throughput, latency, resource utilization, and cost efficiency analysis
 
-
-**Out of scope**:
-- Configure and execute LLM-based inference stacks in non-cloud environments
-- Training and fine-tuning LLMs (existing models will be used instead) 
-- Long-term production deployment and monitoring
-
+**Out of Scope**:
+- Custom model training or fine-tuning
+- Real-time production deployment beyond testing environments
+- Integration with proprietary cloud services not available for testing
+- Long-term production monitoring and maintenance
 
 ## 4. Solution Concept
 
@@ -111,84 +106,26 @@ To accommodate cloud computing, all components in the serving part can be distri
 - Code and dockerfile of deploy a chatbot that integrates RAG
   
 
-**Sprint 2 (10/08 – 10/28)**  
-**Tasks:**  
-- Build and integrate document processing pipeline (text, PDFs, structured data)  
-- Deploy vector database (FAISS or Pinecone) and embedding model (sentence-transformers)  
-- Implement retrieval engine for similarity search  
-- Conduct RAG-specific benchmarking (retrieval latency, embedding throughput, query-response time)  
-- Run scalability tests with increasing dataset sizes  
+**Sprint 3 (10/29)**
+- Deploy Redis caching infrastructure
+- Implement all three cache types (embedding, query, response)
+- Optimize cache configurations
+- Measure cache performance impact
 
-**Deliverables:**  
-- Functional document ingestion and processing pipeline  
-- Fully deployed vector database and embedding model  
-- Working retrieval engine integrated with RAG pipeline  
-- Performance report on RAG workloads, including retrieval-specific metrics  
+**Sprint 4 (11/05)**
+- Add orchestration layer for complex workflows
+- Implement agentic task management
+- Performance testing and optimization
 
+**Sprint 5 (11/19)**
+- Final performance testing and optimization
+- Generate comprehensive analysis report
+- Prepare final presentation materials
 
-**Sprint 3 (10/29 – 11/04)**  
-**Tasks:**  
-- Deploy Redis caching infrastructure (cluster mode with persistence enabled)  
-- Implement three cache types:  
-  - Embedding Cache  
-  - Query Cache  
-  - Response Cache  
-- Optimize cache configurations (eviction policies, memory allocation, sharding)  
-- Conduct A/B experiments to measure performance with vs. without caching  
-- Analyze cache hit/miss rates and their impact on end-to-end latency  
-
-**Deliverables:**  
-- Running Redis cluster with all cache types enabled  
-- Optimized cache configuration tuned for workload patterns  
-- Benchmark report showing cache performance improvements (latency, throughput, cost-efficiency)
-
-**Sprint 4 (11/05 – 11/18)**  
-**Tasks:**  
-- Deploy orchestration layer for complex workflows (Kubernetes-native orchestration + workflow engine)  
-- Integrate MCP Server for model context protocol management  
-- Implement agentic task management (multi-step workflows, tool integration, decision branching)  
-- Enable heterogeneous scheduling (dynamic CPU/GPU task routing based on workload)  
-- Conduct stress testing and workflow-level benchmarking (latency, throughput, fault tolerance)  
-- Document system behavior under scaling and failure scenarios  
-
-**Deliverables:**  
-- Fully functional orchestration layer integrated with inference stack  
-- MCP Server deployed and connected with agentic workflows  
-- Heterogeneous scheduler tested on mixed CPU/GPU workloads  
-- Benchmark report on complex agentic workflows  
-- Documentation of fault tolerance, scaling behavior, and workflow resilience  
-
-
-**Sprint 5 (11/19 – 12/07)**  
-**Tasks:**  
-- Conduct end-to-end benchmarking across all components (vLLM, RAG, caching, orchestration)  
-- Perform cross-cloud comparison (AWS, GCP, Azure, Intel Gaudi vs. NVIDIA GPUs)  
-- Optimize autoscaling and resource utilization policies (HPA, cluster autoscaler)  
-- Conduct cost-performance trade-off analysis under varying workloads  
-- Finalize best practices and recommendations for deployment  
-- Prepare demo scripts, visualization dashboards, and presentation slides  
-
-**Deliverables:**  
-- Complete benchmarking dataset with comparative analysis across clouds and accelerators  
-- Performance vs. cost analysis report (throughput, latency, TTFT, TPOT, cost per query)  
-- Optimized resource scaling configurations with documented results  
-- Best practices guide for deploying cloud-based inference stacks  
-- Final presentation package (slides + demo walkthrough + README documentation)  
-
-
-**Final Presentation (12/08)**  
-**Tasks:**  
-- Deliver final project presentation to stakeholders (class, mentors, evaluators)  
-- Demonstrate end-to-end inference stack (vLLM + RAG + Caching + Orchestration + Agentic workflows)  
-- Present benchmarking results with visualizations (latency, throughput, cost, scaling trends)  
-- Highlight cross-cloud comparison findings (AWS vs. GCP vs. Azure, NVIDIA vs. Gaudi accelerators)  
-- Share lessons learned, limitations, and future directions  
-
-**Deliverables:**  
-- Live demo of the complete inference and benchmarking framework  
-- Final presentation slides and report submitted  
-- Visualization dashboards showcasing benchmark results  
-- Documented best practices and recommendations for cloud-native AI inference deployment  
+**Final Presentation (12/08)**
+- Present project results and findings
+- Demonstrate benchmarking framework
+- Share best practices and recommendations
 
 ## General comments
 

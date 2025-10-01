@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vllm-inference
+  labels:
+    name: vllm-inference
+    project: inf4rag
+    environment: base
