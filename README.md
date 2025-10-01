@@ -1,5 +1,13 @@
 # Optimizing Cloud-Based Inference for RAG and Agentic Workloads
 
+**Sprint Demo 1**: [Video](https://www.youtube.com/watch?v=v3LFXQYkRXo)
+
+**Spring Slide 1**: [Slide](https://docs.google.com/presentation/d/1RKOQLFk7j06XYhz2eu14nveVqJZbtXoV1pJ_SUVzOQ0/edit?usp=sharing)
+
+In the first sprint, we mainly focused on researching and deeply understanding our project as a whole and show a demo.
+
+---
+
 ## Project Overview
 
 This project focuses on optimizing cloud-based inference for RAG (Retrieval-Augmented Generation) and agentic workloads. We will explore how modern AI inference workloads can be efficiently served using cloud-native infrastructure, evaluating different components including model serving frameworks, orchestration layers, caching strategies, and GPU/accelerator utilization. The key objective is to identify performance and cost trade-offs when deploying these systems on major cloud platforms.
@@ -8,11 +16,15 @@ This project focuses on optimizing cloud-based inference for RAG (Retrieval-Augm
 
 **Vision**: To deliver a comprehensive benchmarking framework that enables organizations to make informed decisions about deploying scalable, high-performance AI inference systems in cloud environments, with particular focus on RAG and agentic workloads.
 
-**Goals**:
-- Understand AI inference architectures and how modern LLM workloads (e.g., RAG, agentic tasks) are structured and executed in cloud environments
-- Deploy and manage inference stacks using tools such as vLLM and llm-d, and integrate them with open-source language models
-- Configure and benchmark accelerator-based infrastructure (e.g., Intel Gaudi, NVIDIA GPUs) for high-performance model serving
-- Design and run benchmarking experiments to evaluate inference performance in terms of latency, throughput, scalability, and cost
+**High-Level Goals**:
+- End-to-End Inference Flow: Build and deploy a complete inference pipeline that supports both simple chatbot interactions and more advanced agentic use cases (e.g., automating domain-specific tasks).
+- Retrieval-Augmented Generation (RAG): Implement RAG pipelines that enhance inference by incorporating external, domain-specific data at query time, improving relevance and adaptability of outputs.
+- Inference Stack Optimization: Evaluate model serving frameworks such as vLLM and orchestration tools like llm-d, focusing on latency, throughput, and cost trade-offs.
+- Deployment on Cloud Infrastructure: Containerize and manage the inference stack within a Kubernetes cluster, enabling reproducible, scalable deployments.
+- Benchmarking and Best Practices: Develop a standardized benchmarking suite to compare configurations, analyze results, and compile findings into a final report.
+
+**Stretch Goals**: 
+- Heterogeneous Scheduling: Explore strategies for efficiently distributing workloads across CPUs and accelerators, identifying where GPU offloading provides the most performance benefit.
 
 ## 2. Users/Personas Of The Project:
 
@@ -84,17 +96,15 @@ To accommodate cloud computing, all components in the serving part can be distri
 
 ## 6. Release Planning:
 
-**Sprint 1 (09/24)**
-- Set up development environment and cloud access
-- Deploy basic vLLM infrastructure
-- Implement initial benchmarking suite
-- Establish baseline performance metrics
+**Sprint 1 (09/24 – 10/07)**  
+**Tasks:**  
+- Provision cloud resources (at least 2 providers: AWS/GCP or Azure)  
+- Deploy basic vLLM engine in a Kubernetes cluster (or local server if cloud resource is not available yet)
+- Develop a chatbot with retrieval augmented generation 
 
-**Sprint 2 (10/08)**
-- Integrate document processing pipeline
-- Deploy vector database and embedding model
-- Implement retrieval engine
-- Measure RAG-specific performance metrics
+**Deliverables:**
+- Code and dockerfile of deploy a chatbot that integrates RAG
+  
 
 **Sprint 3 (10/29)**
 - Deploy Redis caching infrastructure

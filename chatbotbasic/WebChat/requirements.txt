@@ -1,0 +1,22 @@
+# UI
+gradio==5.47.2
+
+# LLM SDKs
+openai>=1.30.0,<2.0
+anthropic>=0.68.1,<1.0
+huggingface_hub>=0.35.1,<2.0
+tiktoken>=0.11.0
+sentencepiece>=0.2.1
+
+# LangChain + vector store
+langchain>=0.2.10
+langchain-community>=0.2.10
+langchain-openai>=0.1.20
+faiss-cpu>=1.7.4
+gitpython>=3.1.41
+
+# Tools your code uses
+selenium==4.35.0
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+pyyaml>=6.0
