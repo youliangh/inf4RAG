@@ -1,5 +1,9 @@
 # Optimizing Cloud-Based Inference for RAG and Agentic Workloads
 
+**Sprint Demo 1**: [Video](https://www.youtube.com/watch?v=v3LFXQYkRXo)
+
+---
+
 ## Project Overview
 
 This project focuses on optimizing cloud-based inference for RAG (Retrieval-Augmented Generation) and agentic workloads. We will explore how modern AI inference workloads can be efficiently served using cloud-native infrastructure, evaluating different components including model serving frameworks, orchestration layers, caching strategies, and GPU/accelerator utilization. The key objective is to identify performance and cost trade-offs when deploying these systems on major cloud platforms.
@@ -96,15 +100,12 @@ To accommodate cloud computing, all components in the serving part can be distri
 **Sprint 1 (09/24 – 10/07)**  
 **Tasks:**  
 - Provision cloud resources (at least 2 providers: AWS/GCP or Azure)  
-- Deploy basic vLLM engine in a Kubernetes cluster  
-- Set up CI/CD pipeline for reproducible deployments  
-- Develop initial benchmarking suite (focus on latency, throughput, TTFT)  
-- Run baseline performance tests on CPU-only and single-GPU setups  
+- Deploy basic vLLM engine in a Kubernetes cluster (or local server if cloud resource is not available yet)
+- Develop a chatbot with retrieval augmented generation 
 
-**Deliverables:**  
-- Running vLLM inference service on the cloud  
-- First version of benchmarking toolkit  
-- Documented baseline metrics report  
+**Deliverables:**
+- Code and dockerfile of deploy a chatbot that integrates RAG
+  
 
 **Sprint 2 (10/08 – 10/28)**  
 **Tasks:**  
