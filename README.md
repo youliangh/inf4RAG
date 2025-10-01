@@ -2,6 +2,10 @@
 
 **Sprint Demo 1**: [Video](https://www.youtube.com/watch?v=v3LFXQYkRXo)
 
+**Spring Slide 1**: [Slide](https://docs.google.com/presentation/d/1RKOQLFk7j06XYhz2eu14nveVqJZbtXoV1pJ_SUVzOQ0/edit?usp=sharing)
+
+In the first sprint, we mainly focused on researching and deeply understanding our project as a whole and show a demo.
+
 ---
 
 ## Project Overview
