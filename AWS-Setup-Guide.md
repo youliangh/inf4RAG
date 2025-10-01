@@ -1,7 +1,7 @@
 # AWS Setup Guide for inf4RAG Project
 
 ## Overview
-This guide will help you set up AWS CLI and configure access to our EKS cluster for the inf4RAG project.
+This guide will help you set up AWS CLI and configure access to our EKS cluster for the inf4RAG project. The GPT-2 inference service is already deployed and ready to use.
 
 ## Prerequisites
 - macOS (with Homebrew installed)
@@ -73,40 +73,51 @@ aws eks update-kubeconfig --region us-west-2 --name inf4rag
 kubectl get nodes
 ```
 
-Expected output: You should see 2 t3.micro nodes in Ready status
+Expected output: You should see 3 nodes (2 t3.micro + 1 t3.large) in Ready status
 
-## Step 6: Verify Cluster Status
+## Step 6: Access the GPT-2 Service
+
+The GPT-2 inference service is already deployed and running. You can access it in two ways:
+
+### Option 1: Using LoadBalancer (External Access)
 
 ```bash
-# Check all cluster components
-kubectl get all --all-namespaces
+# Get the external URL
+kubectl get service gpt2-simple-service -n vllm-inference
 
-# View cluster information
-kubectl cluster-info
-
-# Check node details
-kubectl describe nodes
+# Test the service (replace with actual LoadBalancer URL)
+curl http://a971802cc82fb4bc28974a5beab4291d-1506849826.us-west-2.elb.amazonaws.com:8000/health
 ```
 
-
-=================================================================================
-from here not ok
-
-## Step 7: Deploy Test Application (Optional)
+### Option 2: Using Port Forward (Recommended for Development)
 
 ```bash
-# Deploy nginx test
-kubectl create deployment nginx --image=nginx
+# Port forward to local machine
+kubectl port-forward service/gpt2-simple-service 8000:8000 -n vllm-inference
 
-# Expose as LoadBalancer
-kubectl expose deployment nginx --port=80 --type=LoadBalancer
+# In another terminal, test the service
+curl http://localhost:8000/health
+```
 
-# Check service status
-kubectl get services
+## Step 7: Test the GPT-2 API
 
-# Clean up test deployment
-kubectl delete service nginx
-kubectl delete deployment nginx
+Once connected, you can test the GPT-2 service:
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# List available models
+curl http://localhost:8000/v1/models
+
+# Generate text
+curl -X POST http://localhost:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt2",
+    "prompt": "Hello, world!",
+    "max_tokens": 50
+  }'
 ```
 
 ## Current Cluster Configuration
@@ -114,9 +125,11 @@ kubectl delete deployment nginx
 - **Cluster Name**: `inf4rag`
 - **Region**: `us-west-2`
 - **Kubernetes Version**: `v1.32`
-- **Node Type**: `t3.micro` (Free Tier)
-- **Number of Nodes**: 2
-- **Node Group**: `workers`
+- **Node Types**: 
+  - 2x `t3.micro` (Free Tier)
+  - 1x `t3.large` (GPT-2 service)
+- **Deployed Services**:
+  - GPT-2 Inference Service (namespace: `vllm-inference`)
 
 ## Troubleshooting
 
@@ -138,9 +151,9 @@ kubectl delete deployment nginx
    - Re-run: `aws eks update-kubeconfig --region us-west-2 --name inf4rag`
    - Check context: `kubectl config current-context`
 
-5. **Unable to connect to server**
-   - Wait a few minutes for the cluster to be fully ready
-   - Verify your AWS credentials are correct
+5. **Service Not Accessible**
+   - Check if port-forward is running: `kubectl port-forward service/gpt2-simple-service 8000:8000 -n vllm-inference`
+   - Verify service status: `kubectl get pods -n vllm-inference`
 
 ## Security Best Practices
 
@@ -150,60 +163,40 @@ kubectl delete deployment nginx
 - Rotate access keys regularly
 - Do not share your credentials with others
 
-## GPU Node Group (Advanced - Optional)
-
-⚠️ **Note**: GPU instances are NOT covered by Free Tier and will incur charges!
-
-If you need GPU support for large LLM models:
-
-```bash
-# Create GPU node group (g4dn.xlarge)
-eksctl create nodegroup \
-  --cluster=inf4rag \
-  --region=us-west-2 \
-  --name=gpu-nodes \
-  --node-type=g4dn.xlarge \
-  --nodes=1 \
-  --nodes-min=0 \
-  --nodes-max=2 \
-  --managed
-
-# Install NVIDIA Device Plugin
-kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.14.1/deployments/static/nvidia-device-plugin.yml
-```
-
-## Next Steps
-
-Once setup is complete, you can:
-1. Deploy inf4RAG project applications
-2. Monitor cluster resources with `kubectl top nodes`
-3. View application logs with `kubectl logs`
-4. Collaborate with team members on deployments
-
 ## Useful Commands
 
 ```bash
 # View all resources
 kubectl get all --all-namespaces
 
-# View pods in default namespace
-kubectl get pods
+# View GPT-2 service pods
+kubectl get pods -n vllm-inference
 
-# View services
-kubectl get services
+# View GPT-2 service
+kubectl get service -n vllm-inference
 
 # View cluster nodes
 kubectl get nodes
 
-# Describe a specific pod
-kubectl describe pod <pod-name>
+# Port forward to GPT-2 service
+kubectl port-forward service/gpt2-simple-service 8000:8000 -n vllm-inference
 
-# View pod logs
-kubectl logs <pod-name>
+# View GPT-2 service logs
+kubectl logs -n vllm-inference -l app=gpt2-simple
 
-# Delete a resource
-kubectl delete <resource-type> <resource-name>
+# Test GPT-2 API
+curl -X POST http://localhost:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt2", "prompt": "Your prompt here", "max_tokens": 50}'
 ```
+
+## Next Steps
+
+Once setup is complete, you can:
+1. Use the GPT-2 service for text generation
+2. Integrate with your RAG applications
+3. Monitor service performance
+4. Wait for GPU quota approval for larger models
 
 ## Support
 
@@ -216,5 +209,6 @@ If you encounter any issues:
 **Project**: inf4RAG - Optimizing Cloud-Based Inference for RAG and Agentic Workloads  
 **Region**: us-west-2  
 **Cluster**: inf4rag  
-**Instance Type**: t3.micro (Free Tier)  
-**Setup Date**: September 30, 2025
+**Instance Types**: t3.micro (Free Tier) + t3.large (GPT-2)  
+**Deployed Services**: GPT-2 Inference API  
+**Setup Date**: October 1, 2025

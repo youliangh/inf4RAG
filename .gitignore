@@ -3,6 +3,7 @@
 *.key
 *_accessKeys*
 *_credentials*
+*deploy_vllm-lightweight-inference*
 
 # IDE
 .vscode/
