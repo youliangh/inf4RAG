@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-config
+  namespace: vllm-inference
+data:
+  MODEL_NAME: "microsoft/DialoGPT-medium"
+  MAX_TOKENS: "100"
+  TEMPERATURE: "0.7"
+  HOST: "0.0.0.0"
+  PORT: "8000"

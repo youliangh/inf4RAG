@@ -1,0 +1,95 @@
+# 删除整个Deployment（这样就不会自动重启了）
+# 删除Service（如果需要的话）
+kubectl delete deployment vllm-lightweight -n vllm-inference
+kubectl delete service vllm-lightweight-service -n vllm-inference
+
+# 
+kubectl get pods -n vllm-inference
+kubectl get services -n vllm-inference
+
+# 重新部署，添加CPU配置
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-lightweight
+  namespace: vllm-inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-lightweight
+  template:
+    metadata:
+      labels:
+        app: vllm-lightweight
+    spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: t3.large
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: VLLM_LOGGING_LEVEL
+          value: "DEBUG"
+        - name: CUDA_VISIBLE_DEVICES
+          value: ""
+        - name: VLLM_USE_MODELSCOPE
+          value: "False"
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "1000m"
+          limits:
+            memory: "6Gi"
+            cpu: "2"
+        command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
+        args:
+        - "--model"
+        - "gpt2"
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "8000"
+        - "--max-model-len"
+        - "512"
+        - "--tensor-parallel-size"
+        - "1"
+        - "--enforce-eager"
+        - "--disable-log-requests"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-lightweight-service
+  namespace: vllm-inference
+spec:
+  selector:
+    app: vllm-lightweight
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: LoadBalancer
+EOF
+
+# 
+kubectl get pods -n vllm-inference
+kubectl get services -n vllm-inference
+
+# 
+curl http://a00cb1042dc104a85a26976f413de0c6-1647472312.us-west-2.elb.amazonaws.com:8000/health
+
+kubectl port-forward service/vllm-lightweight-service 8000:8000 -n vllm-inference
+
+# another terminal test
+curl http://localhost:8000/v1/models
+
+curl -X POST http://localhost:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt2",
+    "prompt": "Hello, world!",
+    "max_tokens": 50
+  }'
