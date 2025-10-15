@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-gemma-7b
+  namespace: vllm-inference
+  labels:
+    app: vllm-gemma
+    model: gemma-7b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-gemma
+  template:
+    metadata:
+      labels:
+        app: vllm-gemma
+    spec:
+      serviceAccountName: vllm-service-account
+      # 确保调度到GPU节点
+      nodeSelector:
+        node.kubernetes.io/instance-type: g4dn.xlarge
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:v0.6.3.post1
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: HUGGING_FACE_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: huggingface-token
+              key: token
+        args:
+        - --model=google/gemma-2b-it  # instruction-tuned版本
+        - --host=0.0.0.0
+        - --port=8000
+        - --tensor-parallel-size=1
+        - --dtype=half
+        - --gpu-memory-utilization=0.9
+        - --max-model-len=2048
+        - --trust-remote-code
+        - --enforce-eager
+        resources:
+          requests:
+            cpu: "2"
+            memory: "8Gi"
+            nvidia.com/gpu: "1"
+          limits:
+            cpu: "4"
+            memory: "16Gi"
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 180
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 180
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: cache
+          mountPath: /root/.cache
+      volumes:
+      - name: cache
+        emptyDir:
+          sizeLimit: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-gemma-service
+  namespace: vllm-inference
+  labels:
+    app: vllm-gemma
+spec:
+  selector:
+    app: vllm-gemma
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  type: LoadBalancer  # 或者使用 ClusterIP

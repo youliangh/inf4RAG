@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-gpu-deployment
+  namespace: vllm-inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-gpu
+  template:
+    metadata:
+      labels:
+        app: vllm-gpu
+    spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: g4dn.xlarge
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        resources:
+          requests:
+            memory: "16Gi"
+            cpu: "4"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "32Gi"
+            cpu: "8"
+            nvidia.com/gpu: 1
+        command: ["python", "-m", "vllm.entrypoints.openai.api_server"]
+        args:
+        - "--model"
+        - "microsoft/DialoGPT-medium"
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "8000"
+        - "--tensor-parallel-size"
+        - "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-gpu-service
+  namespace: vllm-inference
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  selector:
+    app: vllm-gpu
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+  type: LoadBalancer
