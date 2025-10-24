@@ -1,4 +1,4 @@
-verbose: False
+verbose: True
 
 description: "### This is a chatbot interface powered by vLLM"
 
