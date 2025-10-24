@@ -149,7 +149,9 @@ To accommodate cloud computing, all components in the serving part can be distri
 - Observe benchmarking metrics and others in the vLLM backend
   
 **AFTER DONE USING**
-- make sure to discard floating IPs and shut down instance
+- Unmount and detach volume
+- Shut off and delete instance
+- Make sure to discard floating IPs
 
 
 ## General comments
