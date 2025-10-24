@@ -3,40 +3,28 @@ import datetime
 import gradio as gr
 import yaml
 
-from models import OpenAIModel, AnthropicModel, HuggingFaceLlama2Model
+from models import OpenAIModel
 from tools import Tools
 
 SYSTEM_MESSAGE_TEMPLATE = "prompt.txt"
 
-MODELS = {
-    "GPT-3.5": OpenAIModel("gpt-3.5-turbo-16k", 16384),
-    "GPT-4": OpenAIModel("gpt-4", 8192),
-    "Claude 2": AnthropicModel("claude-2", 100000),
-    "Llama 2": HuggingFaceLlama2Model("meta-llama/Llama-2-70b-chat-hf", 4096),
-}
-
-# Load configuration from config.yaml.
-#   verbose: should output the prompts to stdout
-#   examples: list of example questions
-#   enabled_models: list of models to enable (names must be in MODELS)
-#   enabled_browsers:  list of browsers to support
-#   temperature: default temperature for LLM
-#   max_actions: maximun number of actions to attempt before aborting
-
 with open("config.yaml", "r") as config_file:
     config = yaml.safe_load(config_file)
+
+# synthesize the base_url
+config["base_url"] = f"http://{config.get('openstack_ip_port', '127.0.0.1:8000')}/v1"
+
+MODELS = {
+    "vLLM": OpenAIModel(config)
+}
 
 verbose = config["verbose"]
 description = config["description"]
 examples = config["examples"]
-enabled_models = config["enabled_models"]
-selected_model = enabled_models[0]
-enabled_browsers = config["enabled_browsers"]
-selected_browser = enabled_browsers[0]
 temperature = config["temperature"]
 max_actions = config["max_actions"]
 
-llm_tools = Tools(browser=selected_browser)
+llm_tools = Tools()
 
 def create_system_message():
     """
@@ -86,8 +74,7 @@ def generate(new_user_message, history):
 
     iteration = 1
 
-    model = MODELS[selected_model]
-    system_message_token_count = model.count_tokens(system_message)
+    model = MODELS["vLLM"]
 
     try:
         while True:
@@ -127,27 +114,6 @@ def generate(new_user_message, history):
 
                         prompt = f"Question: {new_user_message}\n\n"
                         prompt += f"{full_response}\n\n"
-
-                        # Calculate the number of tokens available in the
-                        # context window, after accounting for the system
-                        # message and previous responses
-                        history_token_count = 0
-                        for user_message, assistant_response in history:
-                            history_token_count += model.count_tokens(user_message) + model.count_tokens(assistant_response)
-
-                        prompt_token_count = model.count_tokens(prompt)
-                        result_token_count = model.count_tokens(result)
-
-                        available_tokens = int(0.9 * (model.context_size - system_message_token_count - history_token_count - prompt_token_count))
-
-                        # Truncate the result if it is longer than the available tokens
-                        if result_token_count > available_tokens:
-                            ratio = available_tokens/result_token_count
-                            truncate_result_len = int(len(result) * ratio)
-                            result = result[:truncate_result_len]
-
-                            full_response += f"\n\n<span style='color:gray'>*Note:  Only {ratio*100:.0f}% of the result was shown to the model due to context window limits.*</span>\n\n"
-                            yield full_response
 
                         prompt += f"Result: {result}\n\n"
 
@@ -192,52 +158,32 @@ h3 { text-align: center; }
 #chatbot { flex-grow: 1; overflow: auto; }
 """
 
-multiple_models_enabled = len(enabled_models) > 1
-multiple_browsers_enabled = len(enabled_browsers) > 1
-
 with gr.Blocks(css=CSS) as app:
     gr.Markdown(description)
     chatinterface = gr.ChatInterface(fn=generate, examples=examples)
     chatinterface.chatbot.elem_id = "chatbot"
 
-    with gr.Accordion(label="Options", open=multiple_models_enabled):
+    with gr.Accordion(label="Options", open=False):
         with gr.Row():
-            # Show model selector if there are multiple models enabled
-            model_selector = gr.Radio(label="Model", choices=enabled_models, value=selected_model, visible=multiple_models_enabled)
-
-            # Show web browser selector if Selenium is enabled
-            browser_selector = gr.Radio(label="Web Browser", choices=enabled_browsers, value=selected_browser, visible=multiple_browsers_enabled)
-
-            temperature_slider = gr.Slider(label="Temperature", minimum=0.1, maximum=1, step=0.1, value=temperature)
+            model_name_box = gr.Textbox(
+                label="Model Name",
+                placeholder="N/A",
+                value=MODELS["vLLM"].model_name
+            )
 
             base_url_box = gr.Textbox(
-            label="Base URL",
-            placeholder="https://api.openai.com/v1",
-            value=config.get("base_url", "https://api.openai.com/v1"))
+                label="Request URL",
+                placeholder="https://api.openai.com/v1",
+                value=f"{config.get('base_url', 'https://api.openai.com/v1')}/api_key={config.get('api_key', '')}"
+            )
+
+            temperature_slider = gr.Slider(label="Temperature", minimum=0, maximum=1, step=0.1, value=temperature)
         
-
-            api_key_box = gr.Textbox(
-            label="API Key",
-            placeholder="XXXX",
-            type="password",
-            value=config.get("api_key", ""))
-        
-
-    def change_model(new_model):
-        global selected_model
-        selected_model = new_model
-
-    def change_browser(new_browser):
-        global selected_browser, llm_tools
-        selected_browser = new_browser
-        llm_tools.set_browser(selected_browser)
 
     def change_temperature(new_temperature):
         global temperature
         temperature = new_temperature
 
-    model_selector.change(fn=change_model, inputs=model_selector)
-    browser_selector.change(fn=change_browser, inputs=browser_selector)
     temperature_slider.change(fn=change_temperature, inputs=temperature_slider)
 
 app.queue().launch(debug=True, share=False)
