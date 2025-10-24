@@ -132,6 +132,27 @@ To accommodate cloud computing, all components in the serving part can be distri
 - Present project results and findings
 - Demonstrate benchmarking framework
 - Share best practices and recommendations
+  
+## How to run basic chat bot with vLLM backend
+- Launch instance on openstack
+    - Make sure "vLLM serve" is a security group
+    - Assign a floating IP
+- Attach volume "All-Models" to instance, with path /dev/vdb
+- SSH using the IP to connect to the instance
+- Mount the volume using
+  `sudo mount -t ext4 /dev/vdb /data`
+- Run vLLM backend with `conda activate vllm`
+- Run `vllm serve /data/Phi-3-mini-4k-instruct --api-key=(API KEY GOES HERE)`
+   - using Phi-3-mini since it is lightweight for demo purposes
+- Modify configuration file (./config.yaml) on local machine and replace IP address
+- Launch chatbot on local machine with `python ./app.py`
+- Observe benchmarking metrics and others in the vLLM backend
+  
+**AFTER DONE USING**
+- Unmount and detach volume
+- Shut off and delete instance
+- Make sure to discard floating IPs
+
 
 ## General comments
 
